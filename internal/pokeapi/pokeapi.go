@@ -6,7 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
+
+	"github.com/temminks/go-pokedex/internal/pokecache"
 )
+
+var cache = pokecache.NewCache(5 * time.Second)
 
 type LocationArea struct {
 	Name string
@@ -20,25 +25,39 @@ type Response struct {
 	Results  []LocationArea
 }
 
-func GetLocations(locationOffset int) ([]LocationArea, error) {
-	res, err := http.Get(fmt.Sprintf("https://pokeapi.co/api/v2/location-area/?offset=%d&limit=20", locationOffset))
-	locations := []LocationArea{}
+func getData(url string) (body []byte, err error) {
+	res, err := http.Get(url)
 	if err != nil {
-		return locations, errors.New(fmt.Sprintf("Request failed with error: %s", err))
+		return nil, errors.New(fmt.Sprintf("Request failed with error: %s", err))
 	}
-	body, err := io.ReadAll(res.Body)
+	body, err = io.ReadAll(res.Body)
 	res.Body.Close()
 	if res.StatusCode > 299 {
-		return locations, errors.New(fmt.Sprintf("Response failed with status code: %d and body %s", res.StatusCode, body))
+		return nil, errors.New(fmt.Sprintf("Response failed with status code: %d and body %s", res.StatusCode, body))
 	}
 	if err != nil {
-		return locations, errors.New(fmt.Sprintf("Response failed with error %s", err))
+		return nil, errors.New(fmt.Sprintf("Response failed with error %s", err))
+	}
+
+	return body, nil
+}
+
+func GetLocations(locationOffset int) ([]LocationArea, error) {
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/?offset=%d&limit=20", locationOffset)
+	body, exists := cache.Get(url)
+	if !exists {
+		responseBody, err := getData(url)
+		if err != nil {
+			return nil, err
+		}
+		cache.Add(url, responseBody)
+		body = responseBody
 	}
 
 	response := Response{}
-	err = json.Unmarshal(body, &response)
+	err := json.Unmarshal(body, &response)
 	if err != nil {
-		return locations, err
+		return nil, err
 	}
 
 	return response.Results, nil
