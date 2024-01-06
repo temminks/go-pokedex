@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/temminks/go-pokedex/internal/pokeapi"
 )
@@ -12,7 +13,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(string) error
 }
 
 var locationOffset int
@@ -39,6 +40,11 @@ func getCommands() map[string]cliCommand {
 			description: "Displays the previous 20 map locations",
 			callback:    commandMapb,
 		},
+		"explore": {
+			name:        "explore",
+			description: "Display the names of possible Pokemon encounters",
+			callback:    commandExplore,
+		},
 	}
 }
 
@@ -53,7 +59,33 @@ func getLocations() error {
 	return nil
 }
 
-func commandMap() error {
+func commandExplore(args string) error {
+	if len(strings.Split(args, " ")) > 1 {
+		return errors.New(fmt.Sprintf("only one location can be explored at a time: `%s` is an invalid location.", args))
+	}
+	if strings.Trim(args, " ") == "" {
+		return errors.New("`explore` takes a location as argument.")
+	}
+
+	location, err := pokeapi.GetLocation(args)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Exploring %s...\n", location.Name)
+	fmt.Println("Found Pokemon:")
+	for _, pokemonEncounter := range location.PokemonEncounters {
+		fmt.Printf("- %s\n", pokemonEncounter.Pokemon.Name)
+	}
+
+	return nil
+}
+
+func commandMap(args string) error {
+	if strings.Trim(args, " ") != "" {
+		return errors.New(fmt.Sprintf("`map` does not take args `%s`.", args))
+	}
+
 	err := getLocations()
 	if err != nil {
 		return err
@@ -63,7 +95,11 @@ func commandMap() error {
 	return nil
 }
 
-func commandMapb() error {
+func commandMapb(args string) error {
+	if strings.Trim(args, " ") != "" {
+		return errors.New(fmt.Sprintf("`mapb` does not take args `%s`.", args))
+	}
+
 	locationOffset -= 20
 	if locationOffset < 0 {
 		locationOffset = 0
@@ -76,7 +112,11 @@ func commandMapb() error {
 	return nil
 }
 
-func commandHelp() error {
+func commandHelp(args string) error {
+	if strings.Trim(args, " ") != "" {
+		return errors.New(fmt.Sprintf("`help` does not take args `%s`.", args))
+	}
+
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
 	fmt.Println()
@@ -87,7 +127,7 @@ func commandHelp() error {
 	return nil
 }
 
-func commandExit() error {
+func commandExit(args string) error {
 	os.Exit(0)
 	return nil
 }
@@ -101,9 +141,12 @@ func main() {
 		if len(text) == 0 {
 			continue
 		}
-		command, ok := getCommands()[text]
+
+		commandPart, argsPart, _ := strings.Cut(text, " ")
+
+		command, ok := getCommands()[commandPart]
 		if ok {
-			err := command.callback()
+			err := command.callback(argsPart)
 			if err != nil {
 				fmt.Println(err)
 			}
