@@ -21,7 +21,7 @@ func TestGetPokemon(t *testing.T) {
 		},
 	}
 
-	actualPokemonDetails, err := getPokemonDetails("scyther")
+	actualPokemonDetails, err := GetPokemonDetails("scyther")
 	if err != nil {
 		t.Errorf("did not expect an error when calling the API: %s", err)
 	}
