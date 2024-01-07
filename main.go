@@ -54,6 +54,11 @@ func getCommands() map[string]cliCommand {
 			description: "Try to catch a pokemon. Expects a Pokemon name as parameter.",
 			callback:    commandCatch,
 		},
+		"inspect": {
+			name:        "inspect",
+			description: "Show the details of a Pokemon, including its stats.",
+			callback:    commandInspect,
+		},
 	}
 }
 
@@ -92,6 +97,38 @@ func commandCatch(args string) error {
 		pokedex[pokemon.Name] = pokemon
 	} else {
 		fmt.Printf("%s excaped!\n", pokemon.Name)
+	}
+
+	return nil
+}
+
+func commandInspect(args string) error {
+	if len(strings.Split(args, " ")) > 1 {
+		return errors.New(fmt.Sprintf("only one Pokemon can be inspected at a time: `%s` is invalid.", args))
+	}
+	if strings.Trim(args, " ") == "" {
+		return errors.New("`inspect` takes a Pokemon name as argument.")
+	}
+
+	pokemon, ok := pokedex[args]
+	if !ok {
+		return fmt.Errorf("You have not caught a %s pokemon, yet.", args)
+	}
+	fmt.Printf("Name: %s\n", pokemon.Name)
+	fmt.Printf("Height: %v\n", pokemon.Height)
+	fmt.Printf("Weight: %v\n", pokemon.Weight)
+	fmt.Println("Stats:")
+	for _, stat := range pokemon.Stats {
+		fmt.Printf("  - %s: %v\n", stat.Stat.Name, stat.BaseStat)
+	}
+	if len(pokemon.Types) == 1 {
+		fmt.Println("Type:")
+		fmt.Printf("  - %s", pokemon.Types[0].Type.Name)
+	} else {
+		fmt.Println("Types:")
+		for _, t := range pokemon.Types {
+			fmt.Printf("  - %s\n", t.Type.Name)
+		}
 	}
 
 	return nil
