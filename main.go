@@ -18,7 +18,9 @@ type cliCommand struct {
 	callback    func(string) error
 }
 
-var locationOffset int
+var pokedex = map[string]pokeapi.PokemonDetails{}
+
+var locationOffset = 0
 
 func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
@@ -87,11 +89,10 @@ func commandCatch(args string) error {
 
 	if isCaught {
 		fmt.Printf("%s was caught!\n", pokemon.Name)
+		pokedex[pokemon.Name] = pokemon
 	} else {
 		fmt.Printf("%s excaped!\n", pokemon.Name)
 	}
-
-	// TODO: add to Pokedex
 
 	return nil
 }
