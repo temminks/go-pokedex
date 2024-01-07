@@ -45,6 +45,11 @@ func getCommands() map[string]cliCommand {
 			description: "Display the names of possible Pokemon encounters",
 			callback:    commandExplore,
 		},
+		"catch": {
+			name:        "catch",
+			description: "Try to catch a pokemon",
+			callback:    commandCatch,
+		},
 	}
 }
 
@@ -56,6 +61,24 @@ func getLocations() error {
 	for _, location := range locations {
 		fmt.Println(location.Name)
 	}
+	return nil
+}
+
+func commandCatch(args string) error {
+	if len(strings.Split(args, " ")) > 1 {
+		return errors.New(fmt.Sprintf("only one Pokemon can be caught at a time: `%s` cannot be caught. Use a dash for Pokemon with two-word names, e.g. mime-jr.", args))
+	}
+	if strings.Trim(args, " ") == "" {
+		return errors.New("`catch` requires the Pokemon to catch as an argument.")
+	}
+
+	pokemon, err := pokeapi.GetPokemonDetails(args)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Throwing a Pokeball at %s...\n", pokemon.Name)
+
 	return nil
 }
 
