@@ -39,15 +39,19 @@ type PokemonDetails struct {
 	IsDefault      bool `json:"is_default"`
 	Order          int
 	Weight         int
-	Species        map[string]interface{}
+	Species        Pokemon
+	Stats          []struct {
+		BaseStat int `json:"base_stat"`
+		Effort   int
+		Stat     Pokemon
+	}
+	Types []struct {
+		Slot int
+		Type Pokemon
+	}
 }
 
 type Pokemon struct {
-	Name string
-	Url  string
-}
-
-type LocationArea struct {
 	Name string
 	Url  string
 }
@@ -56,7 +60,7 @@ type Response struct {
 	Count    int
 	Next     string
 	Previous string
-	Results  []LocationArea
+	Results  []Pokemon
 }
 
 type RequestError struct {
@@ -126,11 +130,11 @@ func GetLocation(location string) (Location, error) {
 	return response, nil
 }
 
-func GetLocations(locationOffset int) ([]LocationArea, error) {
+func GetLocations(locationOffset int) ([]Pokemon, error) {
 	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/?offset=%d&limit=20", locationOffset)
 	body, err := loadOrRetrieveFromCache(url)
 	if err != nil {
-		return []LocationArea{}, err
+		return []Pokemon{}, err
 	}
 
 	response := Response{}

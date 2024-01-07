@@ -16,9 +16,9 @@ func TestGetPokemon(t *testing.T) {
 		IsDefault:      true,
 		Order:          196,
 		Weight:         560,
-		Species: map[string]interface{}{
-			"name": "scyther",
-			"url":  "https://pokeapi.co/api/v2/pokemon-species/123/",
+		Species: Pokemon{
+			Name: "scyther",
+			Url:  "https://pokeapi.co/api/v2/pokemon-species/123/",
 		},
 	}
 
@@ -27,9 +27,21 @@ func TestGetPokemon(t *testing.T) {
 		t.Errorf("did not expect an error when calling the API: %s", err)
 	}
 
-	if !reflect.DeepEqual(expectedPokemonDetails, actualPokemonDetails) {
+	if !comparePokemonDetails(expectedPokemonDetails, actualPokemonDetails) {
 		t.Errorf("expected PokemonDetails: %#v, actual PokemonDetails: %#v", expectedPokemonDetails, actualPokemonDetails)
 	}
+}
+
+// comparePokemonDetails compares the fields that exist in expected with actual.
+func comparePokemonDetails(expected, actual PokemonDetails) bool {
+	return reflect.DeepEqual(expected.Id, actual.Id) &&
+		reflect.DeepEqual(expected.Name, actual.Name) &&
+		reflect.DeepEqual(expected.BaseExperience, actual.BaseExperience) &&
+		reflect.DeepEqual(expected.Height, actual.Height) &&
+		reflect.DeepEqual(expected.IsDefault, actual.IsDefault) &&
+		reflect.DeepEqual(expected.Order, actual.Order) &&
+		reflect.DeepEqual(expected.Weight, actual.Weight) &&
+		reflect.DeepEqual(expected.Species, actual.Species)
 }
 
 func TestGetLocationValidLocation(t *testing.T) {
