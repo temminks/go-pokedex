@@ -4,9 +4,11 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 
+	"github.com/temminks/go-pokedex/internal/catching"
 	"github.com/temminks/go-pokedex/internal/pokeapi"
 )
 
@@ -42,12 +44,12 @@ func getCommands() map[string]cliCommand {
 		},
 		"explore": {
 			name:        "explore",
-			description: "Display the names of possible Pokemon encounters",
+			description: "Display the names of possible Pokemon encounters. Expects a location as parameter.",
 			callback:    commandExplore,
 		},
 		"catch": {
 			name:        "catch",
-			description: "Try to catch a pokemon",
+			description: "Try to catch a pokemon. Expects a Pokemon name as parameter.",
 			callback:    commandCatch,
 		},
 	}
@@ -77,7 +79,19 @@ func commandCatch(args string) error {
 		return err
 	}
 
+	catchRate := catching.GetProbability(pokemon.BaseExperience)
+	catchProbability := rand.Float64()
+
 	fmt.Printf("Throwing a Pokeball at %s...\n", pokemon.Name)
+	isCaught := catchProbability < catchRate
+
+	if isCaught {
+		fmt.Printf("%s was caught!\n", pokemon.Name)
+	} else {
+		fmt.Printf("%s excaped!\n", pokemon.Name)
+	}
+
+	// TODO: add to Pokedex
 
 	return nil
 }
