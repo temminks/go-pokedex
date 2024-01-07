@@ -197,7 +197,7 @@ func commandMapb(args string) error {
 		return errors.New(fmt.Sprintf("`mapb` does not take args `%s`.", args))
 	}
 
-	locationOffset -= 20
+	locationOffset -= 40
 	if locationOffset < 0 {
 		locationOffset = 0
 		return errors.New("Cannot go further back...")
@@ -206,6 +206,7 @@ func commandMapb(args string) error {
 	if err != nil {
 		return err
 	}
+	locationOffset += 20
 	return nil
 }
 
