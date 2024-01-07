@@ -112,7 +112,7 @@ func commandInspect(args string) error {
 
 	pokemon, ok := pokedex[args]
 	if !ok {
-		return fmt.Errorf("You have not caught a %s pokemon, yet.", args)
+		return fmt.Errorf("You have not caught a `%s`, yet.", args)
 	}
 	fmt.Printf("Name: %s\n", pokemon.Name)
 	fmt.Printf("Height: %v\n", pokemon.Height)
