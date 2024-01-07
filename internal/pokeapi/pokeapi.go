@@ -28,6 +28,17 @@ type PokemonEncounter struct {
 	VersionDetails []map[string]interface{} `json:"version_details"`
 }
 
+type PokemonDetails struct {
+	Id             int
+	Name           string
+	BaseExperience int `json:"base_experience"`
+	Height         int
+	IsDefault      bool `json:"is_default"`
+	Order          int
+	Weight         int
+	Species        map[string]interface{}
+}
+
 type Pokemon struct {
 	Name string
 	Url  string
@@ -107,3 +118,18 @@ func GetLocations(locationOffset int) ([]LocationArea, error) {
 	return response.Results, nil
 }
 
+func GetPokemonDetails(name string) (PokemonDetails, error) {
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s", name)
+	body, err := loadOrRetrieveFromCache(url)
+	if err != nil {
+		return PokemonDetails{}, err
+	}
+
+	response := PokemonDetails{}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return PokemonDetails{}, err
+	}
+
+	return response, nil
+}
