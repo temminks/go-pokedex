@@ -28,6 +28,9 @@ type PokemonEncounter struct {
 	VersionDetails []map[string]interface{} `json:"version_details"`
 }
 
+// BaseExperience for blissey: 635, mewtwo: 340, rayquaza: 340
+// dialga: 340, palkia 340, giratina 340, arceus 360, audino 390
+// eternatus: 345
 type PokemonDetails struct {
 	Id             int
 	Name           string

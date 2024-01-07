@@ -23,6 +23,7 @@ func NewCache(interval time.Duration) *cache {
 		ticker: *time.NewTicker(interval),
 	}
 
+	// call the reapLoop every `interval` seconds
 	go func() {
 		<-cache.ticker.C
 		cache.reapLoop(interval)
