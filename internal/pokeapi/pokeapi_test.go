@@ -1,6 +1,7 @@
 package pokeapi
 
 import (
+	"fmt"
 	"reflect"
 	"slices"
 	"testing"
@@ -73,4 +74,24 @@ func getPokemonNames(pe []PokemonEncounter) []string {
 		pokemonNames = append(pokemonNames, encounter.Pokemon.Name)
 	}
 	return pokemonNames
+}
+
+func TestGetPokemonDetailsInvalidName(t *testing.T) {
+	invalidName := "this-pokemon-does-not-exist"
+	_, err := GetPokemonDetails(invalidName)
+	if err == nil {
+		t.Errorf("An invalid name `%s` should return an error: %s", invalidName, err)
+	}
+	expectedErr := fmt.Sprintf("Pokemon `%s` not found.", invalidName)
+	if err.Error() != expectedErr {
+		t.Errorf("Unexpected error message! Expected `%s`, actual: `%s`.", expectedErr, err)
+	}
+}
+
+func TestGetPokemonDetailsValidName(t *testing.T) {
+	validName := "scyther"
+	_, err := GetPokemonDetails(validName)
+	if err != nil {
+		t.Errorf("A valid Pokemon name (`%s`) should not result in an error: %s", validName, err)
+	}
 }

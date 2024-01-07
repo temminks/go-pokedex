@@ -59,6 +59,16 @@ type Response struct {
 	Results  []LocationArea
 }
 
+type RequestError struct {
+	StatusCode int
+	Body       []byte
+	Err        error
+}
+
+func (r *RequestError) Error() string {
+	return r.Err.Error()
+}
+
 func loadOrRetrieveFromCache(url string) (body []byte, err error) {
 	body, exists := cache.Get(url)
 	if !exists {
@@ -80,7 +90,11 @@ func getData(url string) (body []byte, err error) {
 	body, err = io.ReadAll(res.Body)
 	res.Body.Close()
 	if res.StatusCode > 299 {
-		return nil, errors.New(fmt.Sprintf("Response failed with status code: `%d` and body `%s`", res.StatusCode, body))
+		return nil, &RequestError{
+			StatusCode: res.StatusCode,
+			Body:       body,
+			Err:        fmt.Errorf("Response failed with status code: `%d` and body `%s`", res.StatusCode, body),
+		}
 	}
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Response failed with error %s", err))
@@ -92,14 +106,21 @@ func getData(url string) (body []byte, err error) {
 func GetLocation(location string) (Location, error) {
 	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%s", location)
 	body, err := loadOrRetrieveFromCache(url)
+	response := Location{}
 	if err != nil {
-		return Location{}, err
+		if re, ok := err.(*RequestError); ok {
+			if re.StatusCode == 404 {
+				return response, fmt.Errorf("Location `%s` not found.", location)
+			} else {
+				return response, re.Err
+			}
+		}
+		return response, err
 	}
 
-	response := Location{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		return Location{}, err
+		return response, err
 	}
 
 	return response, nil
@@ -124,14 +145,21 @@ func GetLocations(locationOffset int) ([]LocationArea, error) {
 func GetPokemonDetails(name string) (PokemonDetails, error) {
 	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s", name)
 	body, err := loadOrRetrieveFromCache(url)
+	response := PokemonDetails{}
 	if err != nil {
-		return PokemonDetails{}, err
+		if re, ok := err.(*RequestError); ok {
+			if re.StatusCode == 404 {
+				return response, fmt.Errorf("Pokemon `%s` not found.", name)
+			} else {
+				return response, re.Err
+			}
+		}
+		return response, err
 	}
 
-	response := PokemonDetails{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		return PokemonDetails{}, err
+		return response, err
 	}
 
 	return response, nil
