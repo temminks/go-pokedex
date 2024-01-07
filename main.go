@@ -59,6 +59,11 @@ func getCommands() map[string]cliCommand {
 			description: "Show the details of a Pokemon, including its stats.",
 			callback:    commandInspect,
 		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Show all the Pokemon you have caught, so far.",
+			callback:    commandPokedex,
+		},
 	}
 }
 
@@ -97,6 +102,23 @@ func commandCatch(args string) error {
 		pokedex[pokemon.Name] = pokemon
 	} else {
 		fmt.Printf("%s excaped!\n", pokemon.Name)
+	}
+
+	return nil
+}
+
+func commandPokedex(args string) error {
+	if strings.Trim(args, " ") != "" {
+		return errors.New(fmt.Sprintf("`pokedex` does not take args `%s`.", args))
+	}
+
+	if len(pokedex) == 0 {
+		fmt.Println("You have not caught any Pokemon, yet. Try exploring locations and good luck on your journey, trainer!")
+	} else {
+		fmt.Println("Your Pokedex:")
+		for _, pokemon := range pokedex {
+			fmt.Printf("  - %s\n", pokemon.Name)
+		}
 	}
 
 	return nil
