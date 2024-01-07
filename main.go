@@ -145,7 +145,7 @@ func commandInspect(args string) error {
 	}
 	if len(pokemon.Types) == 1 {
 		fmt.Println("Type:")
-		fmt.Printf("  - %s", pokemon.Types[0].Type.Name)
+		fmt.Printf("  - %s\n", pokemon.Types[0].Type.Name)
 	} else {
 		fmt.Println("Types:")
 		for _, t := range pokemon.Types {
